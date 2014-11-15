@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html>
+    <title>∂T/∂t + u • ∂T/∂x - æ • (∂^2 T)/∂x^2 = 0</title>
+
+    <script src="res/canvasjs.js"></script>
+    <script src="res/ExplicitDownstreamScheme.js"></script>
+    <script src="res/ExplicitUpstreamScheme.js"></script>
+    <script src="res/ImplicitDownstreamScheme.js"></script>
+    <script src="res/ImplicitUpstreamScheme.js"></script>
+    <script src="res/StaggeredGridScheme.js"></script>
+<head>
+</head>
+<body>
+
+<script type="text/javascript">
+    var updateInterval = 100,
+        number = 1000,
+        velocity = 100, kappa = 0, dx = 0.1, dt = 0.001,
+        funcId = 1;
+
+</script>
+
+<input id="st" type="button" value="start">
+
+<form action="" onsubmit="qqq(this)">
+    <input type="number" value="1000">Время обновления</input>
+    <input type="number" value="1000">Количество точек</input>
+    <input type="number" value="1">Скорость</input>
+    <input type="number" value="0.01">Параметр</input>
+    <input type="number" value="0.1">dx</input>
+    <input type="number" value="0.001">dt</input>
+    <input type="submit" value="OK">
+</form>
+
+<div id="chartContainer1" style="height: 400px; width:100%;"></div>
+<div id="chartContainer2" style="height: 400px; width:100%;"></div>
+<div id="chartContainer3" style="height: 400px; width:100%;"></div>
+<div id="chartContainer4" style="height: 400px; width:100%;"></div>
+<div id="chartContainer5" style="height: 400px; width:100%;"></div>
+
+<script src="res/script.js"></script>
+<script type="text/javascript">
+    var timerId;
+    function stop() {
+        clearInterval(timerId);
+        document.getElementById("st").value = "start";
+        document.getElementById("st").onclick = start;
+    }
+    function start() {
+        timerId = setInterval(updateAll, updateInterval);
+        document.getElementById("st").value = "stop";
+        document.getElementById("st").onclick = stop;
+    }
+
+    document.getElementById("st").onclick = start;
+</script>
+</body>
+</html>

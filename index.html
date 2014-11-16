@@ -1,8 +1,13 @@
 <!DOCTYPE HTML>
-<html>
-    <title>∂T/∂t + u • ∂T/∂x - æ • (∂^2 T)/∂x^2 = 0</title>
+<html lang="en">
+    <meta charset="UTF-8">
+    <title>PDHE</title>
 
+    <link href="img/favicon.ico" rel="shortcut icon"/>
+    <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <script src="js/bootstrap.js"></script>
     <script src="res/canvasjs.js"></script>
+
     <script src="res/ExplicitDownstreamScheme.js"></script>
     <script src="res/ExplicitUpstreamScheme.js"></script>
     <script src="res/ImplicitDownstreamScheme.js"></script>
@@ -11,48 +16,100 @@
 <head>
 </head>
 <body>
+    <h1 align="center">Partial differential heat equation</h1>
+    <h2 align="center"><var>∂T/∂t + u * ∂T/∂x - æ * (∂^2 T)/∂x^2 = 0</var></h2>
+    <div class="row">
+        <div class="col-xs-1"></div>
+        <div class="col-xs-3">
+            <form class="form-horizontal">
+                <div class="form-horizontal">
+                    <label class="control-label" for="p-update">Update time</label>
+                    <input class="form-control" type="text" id="p-update" placeholder="1000">
+                </div>
+                <div class="form-horizontal">
+                    <label class="control-label" for="p-point_count">Points — <var>N</var></label>
+                    <input class="form-control" type="text" id="p-point_count" placeholder="100">
+                </div>
+                <div class="form-horizontal">
+                    <label class="control-label" for="p-velocity">Velocity — <var>u</var></label>
+                    <input class="form-control" type="text" id="p-velocity" placeholder="0.01">
+                </div>
+                <div class="form-horizontal">
+                    <label class="control-label" for="p-kappa"><var>æ</var></label>
+                    <input class="form-control" type="text" id="p-kappa" placeholder="0.01">
+                </div>
+            </form>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-horizontal">
+                <label class="control-label" for="p-dx"><var>∂x</var></label>
+                <input class="form-control" type="text" id="p-dx" placeholder="0.1">
+            </div>
+            <div class="form-horizontal">
+                <label class="control-label" for="p-dt"><var>∂t</var></label>
+                <input class="form-control" type="text" id="p-dt" placeholder="0.001">
+            </div>
+            <form class="form-horizontal">
+                <label class="control-label" for="p-scheme">Scheme</label>
+                <select class="form-control" id="p-scheme">
+                    <option>Explicit downstream</option>
+                    <option>Explicit upstream</option>
+                    <option>Implicit downstream</option>
+                    <option>Implicit upstream</option>
+                    <option>Staggered grid</option>
+                </select>
+                <label class="control-label" for="p-y_values">Initial <var>y</var> values</label>
+                <select class="form-control" id="p-y_values">
+                    <option>20% on left is 1, others = 0</option>
+                    <option>middle point is 100, others is 0</option>
+                    <option>random values</option>
+                </select>
+            </form>
+        </div>
+        <div class="col-xs-3">
+            <form class="form-horizontal">
+            <p class="text-center" style="font-weight: bold"><var id="v-s">...</var></p>
+            <p class="text-center" style="font-weight: bold"><var id="v-r">...</var></p>
+            <button type="button" class="btn btn-default btn-block" id="b-start">Start</button>
+            <button type="button" class="btn btn-default btn-block" id="b-pause" disabled="disabled">Pause</button>
+            <button type="button" class="btn btn-default btn-block" id="b-stop" disabled="disabled">Stop</button>
+            <button type="button" class="btn btn-default btn-block" id="b-update" disabled="disabled">Update</button>
+            </form>
+        </div>
+        <div class="col-xs-1"></div>
+    </div>
+    <div id="chart" style="height: 400px; width: 100%"></div>
 
 <script type="text/javascript">
-    var updateInterval = 100,
-        number = 1000,
-        velocity = 100, kappa = 0, dx = 0.1, dt = 0.001,
+    var updateInterval = 1000,
+        number = 100,
+        velocity = 0.01, kappa = 0.01, dx = 0.1, dt = 0.001,
         funcId = 1;
-
 </script>
-
-<input id="st" type="button" value="start">
-
-<form action="" onsubmit="qqq(this)">
-    <input type="number" value="1000">Время обновления</input>
-    <input type="number" value="1000">Количество точек</input>
-    <input type="number" value="1">Скорость</input>
-    <input type="number" value="0.01">Параметр</input>
-    <input type="number" value="0.1">dx</input>
-    <input type="number" value="0.001">dt</input>
-    <input type="submit" value="OK">
-</form>
-
-<div id="chartContainer1" style="height: 400px; width:100%;"></div>
-<div id="chartContainer2" style="height: 400px; width:100%;"></div>
-<div id="chartContainer3" style="height: 400px; width:100%;"></div>
-<div id="chartContainer4" style="height: 400px; width:100%;"></div>
-<div id="chartContainer5" style="height: 400px; width:100%;"></div>
 
 <script src="res/script.js"></script>
 <script type="text/javascript">
     var timerId;
-    function stop() {
+    var b_start = document.getElementById("b-start");
+    var b_pause = document.getElementById("b-pause");
+    var v_s = document.getElementById("v-s");
+    var v_r = document.getElementById("v-r");
+    v_s.innerHTML = "S = u * ∂t / ∂x = " + (velocity * (dt / dx)).toFixed(4);
+    v_r.innerHTML = "R = æ * ∂t / (∂x^2) = " + (kappa * dt / (dx * dx)).toFixed(4);
+    function pause() {
         clearInterval(timerId);
-        document.getElementById("st").value = "start";
-        document.getElementById("st").onclick = start;
+        b_pause.disabled = "true";
+        b_start.disabled = "";
     }
     function start() {
         timerId = setInterval(updateAll, updateInterval);
-        document.getElementById("st").value = "stop";
-        document.getElementById("st").onclick = stop;
+        b_start.disabled = "true";
+        b_pause.disabled = "";
+        b_start.innerHTML = "Resume";
     }
-
-    document.getElementById("st").onclick = start;
+    _init();
+    b_start.onclick = start;
+    b_pause.onclick = pause;
 </script>
 </body>
 </html>

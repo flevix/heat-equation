@@ -12,10 +12,10 @@ var fun = funcId == 1 ? fun1 : funcId == 2 ? fun2 : fun3;
 var y = init(fun);
 
 var scheme1 = new ExplicitUpstreamScheme(velocity, kappa, dx, dt, y);
-var scheme2 = new ExplicitDownstreamScheme(velocity, kappa, dx, dt, y);
-var scheme3 = new ImplicitDownstreamScheme(velocity, kappa, dx, dt, y);
-var scheme4 = new ImplicitUpstreamScheme(velocity, kappa, dx, dt, y);
-var scheme5 = new StaggeredGridScheme(velocity, kappa, dx, dt, y, (new ExplicitUpstreamScheme(velocity, kappa, dx, dt, y)).nextTimeLayer());
+//var scheme2 = new ExplicitDownstreamScheme(velocity, kappa, dx, dt, y);
+//var scheme3 = new ImplicitDownstreamScheme(velocity, kappa, dx, dt, y);
+//var scheme4 = new ImplicitUpstreamScheme(velocity, kappa, dx, dt, y);
+//var scheme5 = new StaggeredGridScheme(velocity, kappa, dx, dt, y, (new ExplicitUpstreamScheme(velocity, kappa, dx, dt, y)).nextTimeLayer());
 
 function init(fun) {
     var f = [];
@@ -41,41 +41,44 @@ var update = function (chart, dps, data) {
 };
 
 var dps1 = [];
-var chart1 = new CanvasJS.Chart("chartContainer1",{
-    title : { text: "Явная против потока" },
+var chart1 = new CanvasJS.Chart("chart",{
+    title : { text: "Explicit upstream scheme" },
     data: [{ type: "line", dataPoints: dps1 }]
 });
-
-var dps2 = [];
-var chart2 = new CanvasJS.Chart("chartContainer2",{
-    title : { text: "Явная по потоку" },
-    data: [{ type: "line", dataPoints: dps2 }]
-});
-
-var dps3 = [];
-var chart3 = new CanvasJS.Chart("chartContainer3",{
-    title : { text: "Неявная по потоку" },
-    data: [{ type: "line", dataPoints: dps3 }]
-});
-
-var dps4 = [];
-var chart4 = new CanvasJS.Chart("chartContainer4",{
-    title : { text: "Неявная против потоку" },
-    data: [{ type: "line", dataPoints: dps4 }]
-});
-
-var dps5 = [];
-var chart5 = new CanvasJS.Chart("chartContainer5",{
-    title : { text: "Чехарда" },
-    data: [{ type: "line", dataPoints: dps5 }]
-});
+//
+//var dps2 = [];
+//var chart2 = new CanvasJS.Chart("chartContainer2",{
+//    title : { text: "Явная по потоку" },
+//    data: [{ type: "line", dataPoints: dps2 }]
+//});
+//
+//var dps3 = [];
+//var chart3 = new CanvasJS.Chart("chartContainer3",{
+//    title : { text: "Неявная по потоку" },
+//    data: [{ type: "line", dataPoints: dps3 }]
+//});
+//
+//var dps4 = [];
+//var chart4 = new CanvasJS.Chart("chartContainer4",{
+//    title : { text: "Неявная против потоку" },
+//    data: [{ type: "line", dataPoints: dps4 }]
+//});
+//
+//var dps5 = [];
+//var chart5 = new CanvasJS.Chart("chartContainer5",{
+//    title : { text: "Чехарда" },
+//    data: [{ type: "line", dataPoints: dps5 }]
+//});
+function _init() {
+    update(chart1, dps1, {x:x,y:y});
+}
 
 function updateAll() {
     update(chart1, dps1, next(scheme1));
-    update(chart2, dps2, next(scheme2));
-    update(chart3, dps3, next(scheme3));
-    update(chart4, dps4, next(scheme4));
-    update(chart5, dps5, next(scheme5));
+    //update(chart2, dps2, next(scheme2));
+    //update(chart3, dps3, next(scheme3));
+    //update(chart4, dps4, next(scheme4));
+    //update(chart5, dps5, next(scheme5));
 }
 
 

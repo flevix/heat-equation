@@ -13,6 +13,8 @@
     <script src="res/ImplicitDownstreamScheme.js"></script>
     <script src="res/ImplicitUpstreamScheme.js"></script>
     <script src="res/StaggeredGridScheme.js"></script>
+
+    <!--TODO: res* to js, D3.js -->
 <head>
 </head>
 <body>
@@ -115,7 +117,9 @@
             velocity: document.getElementById('p-velocity'),
             kappa: document.getElementById('p-kappa'),
             dx: document.getElementById('p-dx'),
-            dt: document.getElementById('p-dt')
+            dt: document.getElementById('p-dt'),
+            scheme: document.getElementById('p-scheme'),
+            func: document.getElementById('p-y-values')
         },
         elValues = {
             update: document.getElementById('v-update'),
@@ -123,7 +127,11 @@
             velocity: document.getElementById('v-velocity'),
             kappa: document.getElementById('v-kappa'),
             dx: document.getElementById('v-dx'),
-            dt: document.getElementById('v-dt')
+            dt: document.getElementById('v-dt'),
+            scheme: document.getElementById('v-scheme'),
+            func: document.getElementById('v-y-values'),
+            s: document.getElementById('v-s'),
+            r: document.getElementById('v-r')
         },
         elButtons = {
             start: document.getElementById("b-start"),
@@ -141,15 +149,6 @@
             func: 0
         };
 
-    elParams.prototype = { //??
-        scheme: document.getElementById('p-scheme'),
-        func: document.getElementById('p-y-values')
-    };
-    elValues.prototype = {
-        scheme: document.getElementById('v-scheme'),
-        func: document.getElementById('v-y-values')
-    };
-
     var yFunc = [
             function(i){return i < params.points / 5 ? 1. : 0.},
             function(i){return i == params.points / 2 ? 100. : 0.},
@@ -166,7 +165,7 @@
                 return new ImplicitDownstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y);
             },
             function() {
-                return new new ImplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y);
+                return new ImplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y);
             },
             function() {
                 return new StaggeredGridScheme(params.velocity, params.kappa, params.dx, params.dt, y, (new ExplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y)).nextTimeLayer());
@@ -182,16 +181,20 @@
         x = [], y = [], timerId;
 
     function updateParams() {
-        for (var p in elParams) {
-            if (p !== 'prototype' && elParams.hasOwnProperty(p) && elValues.hasOwnProperty(p)) {
-                elValues[p].innerHTML = elParams[p].value;
-                params[p] = +elParams[p].value;
+        function _update(/* String[] */ px) {
+            for (var i = 0; i < px.length; i++) {
+                elValues[px[i]].innerHTML = elParams[px[i]].value;
+                params[px[i]] = +elParams[px[i]].value;
             }
         }
-        elValues.prototype.scheme.innerHTML = elParams.prototype.scheme.selectedIndex + 1;
-        params.scheme = +elParams.prototype.scheme.selectedIndex;
-        elValues.prototype.func.innerHTML = elParams.prototype.func.selectedIndex + 1;
-        params.func = +elParams.prototype.func.selectedIndex;
+
+        _update(['update', 'points', 'velocity', 'kappa', 'dx', 'dt']);
+        elValues.scheme.innerHTML = elParams.scheme.selectedIndex + 1;
+        params.scheme = +elParams.scheme.selectedIndex;
+        elValues.func.innerHTML = elParams.func.selectedIndex + 1;
+        params.func = +elParams.func.selectedIndex;
+        elValues.s.innerHTML = '' + (params.velocity * params.dt / params.dx).toFixed(4);
+        elValues.r.innerHTML = '' + (params.kappa * params.dt / (params.dx * params.dx)).toFixed(4);
 
         func = yFunc[params.func];
         initPoints();

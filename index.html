@@ -23,24 +23,22 @@
     <div class="row">
         <div class="col-xs-1"></div>
         <div class="col-xs-2">
-            <form class="form-horizontal">
-                <div class="form-horizontal">
-                    <label class="control-label" for="p-update">Update time</label>
-                    <input class="form-control param" type="text" id="p-update" value="1000">
-                </div>
-                <div class="form-horizontal">
-                    <label class="control-label" for="p-point_count">Points — <var>N</var></label>
-                    <input class="form-control param" type="text" id="p-point_count" value="100">
-                </div>
-                <div class="form-horizontal">
-                    <label class="control-label" for="p-velocity">Velocity — <var>u</var></label>
-                    <input class="form-control param" type="text" id="p-velocity" value="0.01">
-                </div>
-                <div class="form-horizontal">
-                    <label class="control-label" for="p-kappa"><var>æ</var></label>
-                    <input class="form-control param" type="text" id="p-kappa" value="0.01">
-                </div>
-            </form>
+            <div class="form-horizontal">
+                <label class="control-label" for="p-update">Update time</label>
+                <input class="form-control param" type="text" id="p-update" value="1000">
+            </div>
+            <div class="form-horizontal">
+                <label class="control-label" for="p-point_count">Points — <var>N</var></label>
+                <input class="form-control param" type="text" id="p-point_count" value="100">
+            </div>
+            <div class="form-horizontal">
+                <label class="control-label" for="p-velocity">Velocity — <var>u</var></label>
+                <input class="form-control param" type="text" id="p-velocity" value="0.01">
+            </div>
+            <div class="form-horizontal">
+                <label class="control-label" for="p-kappa"><var>æ</var></label>
+                <input class="form-control param" type="text" id="p-kappa" value="0.01">
+            </div>
         </div>
         <div class="col-xs-2">
             <div class="form-horizontal">
@@ -70,11 +68,11 @@
         </div>
         <div class="col-xs-2">
             <form class="form-horizontal">
-            <p class="text-center" style="font-weight: bold"><var>S = u * ∂t / ∂x</var></p>
-            <p class="text-center" style="font-weight: bold"><var>R = æ * ∂t / (∂x^2)</var></p>
-            <button type="button" class="btn btn-default btn-block" id="b-start">Start</button>
-            <button type="button" class="btn btn-default btn-block" id="b-stop" disabled="disabled">Stop</button>
-            <button type="button" class="btn btn-default btn-block" id="b-update">Update</button>
+                <p class="text-center" style="font-weight: bold"><var>S = u * ∂t / ∂x</var></p>
+                <p class="text-center" style="font-weight: bold"><var>R = æ * ∂t / (∂x^2)</var></p>
+                <button type="button" class="btn btn-default btn-block" id="b-start">Start</button>
+                <button type="button" class="btn btn-default btn-block" id="b-stop" disabled="disabled">Stop</button>
+                <button type="button" class="btn btn-default btn-block" id="b-update">Update</button>
             </form>
         </div>
         <div class="col-xs-4">
@@ -168,7 +166,8 @@
                 return new ImplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y);
             },
             function() {
-                return new StaggeredGridScheme(params.velocity, params.kappa, params.dx, params.dt, y, (new ExplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y)).nextTimeLayer());
+                return new StaggeredGridScheme(params.velocity, params.kappa, params.dx, params.dt, y,
+                                (new ExplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y)).nextTimeLayer());
             }
         ],
         chartPoints = [],

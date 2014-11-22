@@ -148,25 +148,15 @@
             function(){return Math.random()}
         ],
         schemes = [
-            function() {
-                return new ExplicitDownstreamScheme(params.s, params.r, y);
-            },
-            function() {
-                return new ExplicitUpstreamScheme(params.s, params.r, y);
-            },
-            function() {
-                return new ImplicitDownstreamScheme(params.s, params.r, y);
-            },
-            function() {
-                return new ImplicitUpstreamScheme(params.s, params.r, y);
-            },
-            function() {
-                return new StaggeredGridScheme(params.s, params.r, y);
-            }
+            ExplicitDownstreamScheme,
+            ExplicitUpstreamScheme,
+            ImplicitDownstreamScheme,
+            ImplicitUpstreamScheme,
+            StaggeredGridScheme
         ],
         chartPoints = [],
         chart = new CanvasJS.Chart("chart",{
-            title : { text: "^_^" },
+            title : { text: "(╮°-°)╮┳━━┳ ( ╯°□°)╯ ┻━━┻" },
             data: [{ type: "line", dataPoints: chartPoints }]
         }),
         func,
@@ -183,17 +173,18 @@
 
         _update(['update', 'points', 'velocity', 'kappa', 'dx', 'dt']);
         elValues.scheme.innerHTML = elParams.scheme.selectedIndex + 1;
-        params.scheme = +elParams.scheme.selectedIndex;
         elValues.func.innerHTML = elParams.func.selectedIndex + 1;
-        params.func = +elParams.func.selectedIndex;
         elValues.s.innerHTML = '' + (params.velocity * params.dt / params.dx).toFixed(4);
-        params.s = + elValues.s.innerHTML;
         elValues.r.innerHTML = '' + (params.kappa * params.dt / (params.dx * params.dx)).toFixed(4);
-        params.r = + elValues.r.innerHTML;
 
+        params.scheme = +elParams.scheme.selectedIndex;
+        params.func = +elParams.func.selectedIndex;
+        params.s = +elValues.s.innerHTML;
+        params.r = +elValues.r.innerHTML;
+        //TODO: remove double initPoints
         func = yFunc[params.func];
         initPoints();
-        scheme = schemes[params.scheme]();
+        scheme = new schemes[params.scheme](params.s, params.r, y);
     }
     updateParams();
 
@@ -229,6 +220,7 @@
     }
     function updateChart() {
         for (var i = 0; i < x.length; i++) {
+            //TODO: update only Y
             chartPoints[i] = {
                 x: x[i],
                 y: y[i]

@@ -2,6 +2,7 @@
  * Created by mikhail.nechaev on 22/11/14.
  */
 
+//TODO: validate schemes
 Scheme = function(s, r, currLayer) {
     this._N = currLayer.length;
     this._S = s;

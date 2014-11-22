@@ -7,14 +7,7 @@
     <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet">
 
     <script src="js/canvasjs.js"></script>
-
-    <script src="res/ExplicitDownstreamScheme.js"></script>
-    <script src="res/ExplicitUpstreamScheme.js"></script>
-    <script src="res/ImplicitDownstreamScheme.js"></script>
-    <script src="res/ImplicitUpstreamScheme.js"></script>
-    <script src="res/StaggeredGridScheme.js"></script>
-
-    <!--TODO: res* to js, D3.js -->
+    <script src="js/schemes.js"></script>
 <head>
 </head>
 <body>
@@ -143,6 +136,8 @@
             kappa: 0,
             dx: 0,
             dt: 0,
+            s: 0,
+            r: 0,
             scheme: 0,
             func: 0
         };
@@ -154,20 +149,19 @@
         ],
         schemes = [
             function() {
-                return new ExplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y);
+                return new ExplicitDownstreamScheme(params.s, params.r, y);
             },
             function() {
-                return new ExplicitDownstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y);
+                return new ExplicitUpstreamScheme(params.s, params.r, y);
             },
             function() {
-                return new ImplicitDownstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y);
+                return new ImplicitDownstreamScheme(params.s, params.r, y);
             },
             function() {
-                return new ImplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y);
+                return new ImplicitUpstreamScheme(params.s, params.r, y);
             },
             function() {
-                return new StaggeredGridScheme(params.velocity, params.kappa, params.dx, params.dt, y,
-                                (new ExplicitUpstreamScheme(params.velocity, params.kappa, params.dx, params.dt, y)).nextTimeLayer());
+                return new StaggeredGridScheme(params.s, params.r, y);
             }
         ],
         chartPoints = [],
@@ -193,7 +187,9 @@
         elValues.func.innerHTML = elParams.func.selectedIndex + 1;
         params.func = +elParams.func.selectedIndex;
         elValues.s.innerHTML = '' + (params.velocity * params.dt / params.dx).toFixed(4);
+        params.s = + elValues.s.innerHTML;
         elValues.r.innerHTML = '' + (params.kappa * params.dt / (params.dx * params.dx)).toFixed(4);
+        params.r = + elValues.r.innerHTML;
 
         func = yFunc[params.func];
         initPoints();
@@ -246,7 +242,7 @@
     }
     function start() {
         timerId = setInterval(function() {
-            y = scheme.nextTimeLayer();
+            y = scheme.nextLayer();
             updateChart();
         }, params.update);
         elButtons.start.disabled = "true";

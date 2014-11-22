@@ -125,7 +125,7 @@
         },
         funcs = [
             function(i){return i < params.points / 5 ? 1. : 0.},
-            function(i){return i == params.points / 2 ? 100. : 0.},
+            function(i){return i == ~~(params.points / 2) ? 100. : 0.},
             function(){return Math.random()}
         ],
         schemes = [

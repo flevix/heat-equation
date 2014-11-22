@@ -21,8 +21,8 @@
                 <input class="form-control param" type="text" id="p-update" value="1000">
             </div>
             <div class="form-horizontal">
-                <label class="control-label" for="p-point_count">Points — <var>N</var></label>
-                <input class="form-control param" type="text" id="p-point_count" value="100">
+                <label class="control-label" for="p-points">Points — <var>N</var></label>
+                <input class="form-control param" type="text" id="p-points" value="100">
             </div>
             <div class="form-horizontal">
                 <label class="control-label" for="p-velocity">Velocity — <var>u</var></label>
@@ -51,8 +51,8 @@
                     <option>(4) Implicit upstream</option>
                     <option>(5) Staggered grid</option>
                 </select>
-                <label class="control-label" for="p-y-values">Initial <var>y</var> values</label>
-                <select class="form-control" id="p-y-values">
+                <label class="control-label" for="p-func">Initial <var>y</var> values</label>
+                <select class="form-control" id="p-func">
                     <option>(1) 20% on left is 1, others = 0</option>
                     <option>(2) middle point is 100, others is 0</option>
                     <option>(3) random values</option>
@@ -80,7 +80,7 @@
                     <td>5</td><td><var>∂x</var></td><td id="v-dx">0.1</td>
                 </tr>
                 <tr>
-                    <td>2</td><td><var>N</var></td><td id="v-point_count">100</td>
+                    <td>2</td><td><var>N</var></td><td id="v-points">100</td>
                     <td>6</td><td><var>∂t</var></td><td id="v-dt">0.001</td>
                 </tr>
                 <tr>
@@ -89,7 +89,7 @@
                 </tr>
                 <tr>
                     <td>4</td><td><var>æ</var></td><td id="v-kappa">0.01</td>
-                    <td>8</td><td>y-func</td><td id="v-y-values">1</td>
+                    <td>8</td><td>y-func</td><td id="v-func">1</td>
                 </tr>
                 <tr>
                     <td>•</td><td><var>S</var></td><td id="v-s">0.0001</td>
@@ -102,47 +102,28 @@
     <div id="chart" style="height: 400px; width: 100%"></div>
 
 <script type="text/javascript">
-    var elParams = {
-            update: document.getElementById('p-update'),
-            points: document.getElementById('p-point_count'),
-            velocity: document.getElementById('p-velocity'),
-            kappa: document.getElementById('p-kappa'),
-            dx: document.getElementById('p-dx'),
-            dt: document.getElementById('p-dt'),
-            scheme: document.getElementById('p-scheme'),
-            func: document.getElementById('p-y-values')
-        },
-        elValues = {
-            update: document.getElementById('v-update'),
-            points: document.getElementById('v-point_count'),
-            velocity: document.getElementById('v-velocity'),
-            kappa: document.getElementById('v-kappa'),
-            dx: document.getElementById('v-dx'),
-            dt: document.getElementById('v-dt'),
-            scheme: document.getElementById('v-scheme'),
-            func: document.getElementById('v-y-values'),
-            s: document.getElementById('v-s'),
-            r: document.getElementById('v-r')
-        },
-        elButtons = {
-            start: document.getElementById("b-start"),
-            stop: document.getElementById("b-stop"),
-            update: document.getElementById("b-update")
-        },
+    function createElementsObject(/* string */ prefix, /* string[] */ elements) {
+        var o = {};
+        elements.forEach(function(e) {
+            o[e] = document.getElementById(prefix + e);
+        });
+        return o;
+    }
+    var
+        elParams = createElementsObject(
+            'p-', ['update', 'points', 'velocity', 'kappa', 'dx', 'dt', 'scheme', 'func']
+        ),
+        elValues = createElementsObject(
+            'v-', ['update', 'points', 'velocity', 'kappa', 'dx', 'dt', 'scheme', 'func', 's', 'r']
+        ),
+        elButtons = createElementsObject(
+            'b-', ['start', 'stop', 'update']
+        ),
         params = {
-            update: 0,
-            points: 0,
-            velocity: 0,
-            kappa: 0,
-            dx: 0,
-            dt: 0,
-            s: 0,
-            r: 0,
-            scheme: 0,
-            func: 0
-        };
-
-    var yFunc = [
+            update: 0, points: 0, velocity: 0, kappa: 0, dx: 0,
+            dt: 0, s: 0, r: 0, scheme: 0, func: 0
+        },
+        funcs = [
             function(i){return i < params.points / 5 ? 1. : 0.},
             function(i){return i == params.points / 2 ? 100. : 0.},
             function(){return Math.random()}
@@ -154,39 +135,49 @@
             ImplicitUpstreamScheme,
             StaggeredGridScheme
         ],
-        chartPoints = [],
-        chart = new CanvasJS.Chart("chart",{
-            title : { text: "(╮°-°)╮┳━━┳ ( ╯°□°)╯ ┻━━┻" },
-            data: [{ type: "line", dataPoints: chartPoints }]
-        }),
-        func,
+        chartPoints,
+        chart,
         scheme,
-        x = [], y = [], timerId;
+        y,
+        timerId;
 
-    function updateParams() {
-        function _update(/* String[] */ px) {
-            for (var i = 0; i < px.length; i++) {
-                elValues[px[i]].innerHTML = elParams[px[i]].value;
-                params[px[i]] = +elParams[px[i]].value;
-            }
-        }
+    function initChart(points) {
+        return new CanvasJS.Chart("chart",{
+            title : { text: "(╮°-°)╮┳━━┳ ( ╯°□°)╯ ┻━━┻" },
+            data: [{ type: "line", dataPoints: points }]
+        });
+    }
+    function update() {
+        (function(/* string[] */ px) {
+            px.forEach(function(p) {
+                elValues[p].innerHTML = elParams[p].value;
+                params[p] = +elParams[p].value;
+            });
+        })(['update', 'points', 'velocity', 'kappa', 'dx', 'dt']);
 
-        _update(['update', 'points', 'velocity', 'kappa', 'dx', 'dt']);
         elValues.scheme.innerHTML = elParams.scheme.selectedIndex + 1;
         elValues.func.innerHTML = elParams.func.selectedIndex + 1;
         elValues.s.innerHTML = '' + (params.velocity * params.dt / params.dx).toFixed(4);
         elValues.r.innerHTML = '' + (params.kappa * params.dt / (params.dx * params.dx)).toFixed(4);
 
-        params.scheme = +elParams.scheme.selectedIndex;
-        params.func = +elParams.func.selectedIndex;
+        params.scheme = schemes[+elParams.scheme.selectedIndex];
+        params.func = funcs[+elParams.func.selectedIndex];
         params.s = +elValues.s.innerHTML;
         params.r = +elValues.r.innerHTML;
-        //TODO: remove double initPoints
-        func = yFunc[params.func];
-        initPoints();
-        scheme = new schemes[params.scheme](params.s, params.r, y);
+
+        chartPoints = [];
+        y = [];
+        for (var i = 0; i < params.points; i++) {
+            y[i] = params.func(i);
+            chartPoints.push({
+                x: params.dx * i,
+                y: y[i]
+            });
+        }
+        chart = initChart(chartPoints);
+        chart.render();
+        scheme = new params.scheme(params.s, params.r, y);
     }
-    updateParams();
 
     (function(/* NodeList */ elements){
         [].forEach.call(elements, function(/* HTMLCollection */ element) {
@@ -212,48 +203,32 @@
         });
     })(document.getElementsByClassName("param"));
 
-    function initPoints() {
-        for (var i = 0; i < params.points; i++) {
-            x[i] = params.dx * i;
-            y[i] = func(i);
-        }
-    }
-    function updateChart() {
-        for (var i = 0; i < x.length; i++) {
-            //TODO: update only Y
-            chartPoints[i] = {
-                x: x[i],
-                y: y[i]
-            };
-        }
-        chart.render();
-    }
-    function init() {
-        initPoints();
-        updateChart();
-    }
     function start() {
-        timerId = setInterval(function() {
+        timerId = setTimeout(function f() {
+            var i = 0;
             y = scheme.nextLayer();
-            updateChart();
+            chartPoints.forEach(function(p) {
+                p.y = y[i++];
+            });
+            chart.render();
+            timerId = setTimeout(f, params.update);
         }, params.update);
         elButtons.start.disabled = "true";
         elButtons.stop.disabled = "";
     }
     function stop() {
-        clearInterval(timerId);
+        clearTimeout(timerId);
         elButtons.stop.disabled = "true";
         elButtons.start.disabled = "";
     }
-    function update() {
+    function init() {
         stop();
-        updateParams();
-        init();
+        update();
     }
     init();
     elButtons.start.addEventListener('click', start);
     elButtons.stop.addEventListener('click', stop);
-    elButtons.update.addEventListener('click', update);
+    elButtons.update.addEventListener('click', init);
 </script>
 </body>
 </html>

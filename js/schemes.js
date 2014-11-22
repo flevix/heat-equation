@@ -2,7 +2,6 @@
  * Created by mikhail.nechaev on 22/11/14.
  */
 
-//TODO: validate schemes
 Scheme = function(s, r, currLayer) {
     this._N = currLayer.length;
     this._S = s;
@@ -52,7 +51,7 @@ ImplicitScheme.prototype._solveSystem = function(/* coefficients */ c) {
         b.push((c[i][3] - c[i][0] * b[i - 1]) / (c[i][0] * a[i - 1] + c[i][1]));
     }
     x[this._N - 1] = (c[this._N - 1][3] - c[this._N - 1][0] * b[this._N - 2]) /
-                    (c[this._N - 1][1] + c[this._N - 1][0] * a[this._N - 2]);
+                     (c[this._N - 1][1] + c[this._N - 1][0] * a[this._N - 2]);
     for (i = this._N - 2; i >= 0; i--) {
         x[i] = b[i] + a[i] * x[i + 1];
     }
@@ -81,7 +80,6 @@ StaggeredGridScheme.prototype._nextLayer = function() {
     }
     nextLayer.push(this._rightPoint);
     this.prevLayer = this._currLayer;
-    this._currLayer = nextLayer;
     return nextLayer;
 };
 //-----------------------
@@ -92,9 +90,9 @@ ExplicitDownstreamScheme.prototype = Object.create(ExplicitScheme.prototype);
 ExplicitDownstreamScheme.prototype.constructor = ExplicitDownstreamScheme;
 
 ExplicitDownstreamScheme.prototype._getNewNodeValue = function(i) {
-    return this._R * this._currLayer[i - 1] +
-            (1 - 2 * this._R + this._S) * this._currLayer[i] +
-            (this._R - this._S) * this._currLayer[i + 1];
+    return  this._currLayer[i - 1] * this._R +
+            this._currLayer[i]     * (1 - 2 * this._R + this._S) +
+            this._currLayer[i + 1] * (this._R - this._S);
 };
 //----------
 ExplicitUpstreamScheme = function(s, r, currLayer) {
@@ -104,9 +102,9 @@ ExplicitUpstreamScheme.prototype = Object.create(ExplicitScheme.prototype);
 ExplicitUpstreamScheme.prototype.constructor = ExplicitUpstreamScheme;
 
 ExplicitUpstreamScheme.prototype._getNewNodeValue = function(i) {
-    return (this._R + this._S) * this._currLayer[i - 1] +
-            (1 - 2 * this._R - this._S) * this._currLayer[i] +
-            this._R * this._currLayer[i + 1];
+    return  this._currLayer[i - 1] * (this._R + this._S) +
+            this._currLayer[i]     * (1 - 2 * this._R - this._S) +
+            this._currLayer[i + 1] * this._R;
 };
 //==========
 ImplicitDownstreamScheme = function(s, r, currLayer) {
@@ -118,7 +116,12 @@ ImplicitDownstreamScheme.prototype.constructor = ImplicitDownstreamScheme;
 ImplicitDownstreamScheme.prototype._getSystem = function() {
     var /* coefficients */ c = [], i;
     for (i = 0; i < this._N; i++) {
-        c.push([-this._R, 1 - this._S + 2 * this._R, this._S - this._R, this._currLayer[i]]);
+        c.push([
+            -this._R,
+            1 - this._S + 2 * this._R,
+            this._S - this._R,
+            this._currLayer[i]
+        ]);
     }
     c[0][3] += this._R * this._leftPoint;
     c[this._N - 1][3] -= (this._S - this._R) * this._rightPoint;
@@ -134,7 +137,12 @@ ImplicitUpstreamScheme.prototype.constructor = ImplicitUpstreamScheme;
 ImplicitUpstreamScheme.prototype._getSystem = function() {
     var /* coefficients */ c = [], i;
     for (i = 0; i < this._N; i++) {
-        c.push([-(this._S + this._R), 1 + this._S + 2 * this._R, -this._R, this._currLayer[i]]);
+        c.push([
+            -(this._S + this._R),
+            1 + this._S + 2 * this._R,
+            -this._R,
+            this._currLayer[i]
+        ]);
     }
     c[0][3] += (this._S + this._R) * this._leftPoint;
     c[this._N - 1][3] += this._R * this._rightPoint;
